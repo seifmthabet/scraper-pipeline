@@ -1,0 +1,16 @@
+{
+  "name": "scraper pipeline",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js"
+  },
+  "keywords": [],
+  "type": "module",
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "tree-sitter-javascript": "^0.25.0",
+    "zod": "^4.4.3"
+  }
+}
