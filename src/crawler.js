@@ -44,5 +44,9 @@ export const crawlCatalogue = async () => {
     cataloguePages: cataloguePagesCount,
     discovered: discoveredUrls.size,
     uniqueUrls: discoveredUrls.size,
+    bookLinks: [...discoveredUrls.entries()].map(([url, sourcePage]) => ({
+      url,
+      sourcePage,
+    })),
   };
 };

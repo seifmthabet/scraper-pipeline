@@ -1,11 +1,17 @@
 import { crawlCatalogue } from "./crawler.js";
 
+import { extractDetailPages } from "./extractor.js";
+
 const main = async () => {
   const result = await crawlCatalogue();
 
-  console.log(`catalogue_pages=${result.cataloguePages}`);
-  console.log(`discovered=${result.discovered}`);
-  console.log(`unique_urls=${result.uniqueUrls}`);
+  const records = await extractDetailPages(result.bookLinks);
+
+  if (records.length > 0) {
+    console.log(JSON.stringify(records[0], null, 2))
+  }
+  
+  console.log(`detail_pages=${records.length}`)
 };
 
 main().catch((error) => {
