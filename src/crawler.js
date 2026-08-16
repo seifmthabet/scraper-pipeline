@@ -6,7 +6,7 @@ import { fetchWithCache, ensureCacheDirExists } from "./cache.js";
 export const crawlCatalogue = async () => {
   ensureCacheDirExists();
 
-  const discoveredUrls = new Set();
+  const discoveredUrls = new Map();
   const visitedPages = new Set();
 
   let currentPageUrl = CATALOGUE_URL;
@@ -27,7 +27,11 @@ export const crawlCatalogue = async () => {
       if (!href) return;
 
       const absoluteUrl = new URL(href, currentPageUrl).href;
-      discoveredUrls.add(absoluteUrl);
+
+      if (!discoveredUrls.has(absoluteUrl)) {
+        discoveredUrls.set(absoluteUrl, currentPageUrl);
+      }
+
     });
 
     cataloguePagesCount += 1;

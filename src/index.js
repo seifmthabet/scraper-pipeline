@@ -1,17 +1,45 @@
-import { crawlCatalogue } from "./crawler.js";
+import * as fs from "fs";
+import * as path from "path";
 
-import { extractDetailPages } from "./extractor.js";
+import { crawlCatalogue } from "./crawler.js";
+import { extractValidatedRecords } from "./extractor.js";
+import { OUTPUT_DIR } from "./config.js";
+
+const ensureOutputDirExists = () => {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+};
 
 const main = async () => {
+  ensureOutputDirExists();
+
   const result = await crawlCatalogue();
 
-  const records = await extractDetailPages(result.bookLinks);
+  const { goodRecords, badRecords } = await extractValidatedRecords(
+    result.bookLinks,
+  );
 
-  if (records.length > 0) {
-    console.log(JSON.stringify(records[0], null, 2))
+  const sortedBooks = [...goodRecords].sort((a, b) =>
+    a.product_url.localeCompare(b.product_url),
+  );
+  const sortedErrors = [...badRecords].sort((a, b) =>
+    a.product_url.localeCompare(b.product_url),
+  );
+
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, "books.json"),
+    JSON.stringify(sortedBooks, null, 2),
+  );
+
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, "errors.json"),
+    JSON.stringify(sortedErrors, null, 2),
+  );
+
+  if (sortedBooks.length > 0) {
+    console.log(JSON.stringify(sortedBooks[0], null, 2));
   }
-  
-  console.log(`detail_pages=${records.length}`)
+
+  console.log(`detail_pages=${sortedBooks.length}`);
 };
 
 main().catch((error) => {
