@@ -45,7 +45,7 @@ const getDescription = ($, productRoot) => {
 };
 
 export const extractBookRecord = async ({ url, sourcePage, lastRequestTime }) => {
-  const { html } = await fetchWithCache(url, lastRequestTime);
+  const { html, fromCache } = await fetchWithCache(url, lastRequestTime);
   const $ = cheerio.load(html);
 
   const productRoot = $("article.product_page").length
@@ -59,7 +59,8 @@ export const extractBookRecord = async ({ url, sourcePage, lastRequestTime }) =>
   const description = getDescription($, productRoot);
 
   return {
-    title,
+    raw: {
+      title,
     product_url: url,
     price_text: priceText,
     availability_text: availabilityText,
@@ -67,6 +68,8 @@ export const extractBookRecord = async ({ url, sourcePage, lastRequestTime }) =>
     description,
     source_page: sourcePage,
     fetched_at: new Date().toISOString(),
+    },
+    fromCache,
   }
 }
 
@@ -98,16 +101,21 @@ export const extractValidatedRecords = async (bookLinks) => {
   const goodRecords = [];
   const badRecords = [];
   let lastRequestTime = null;
+  let pagesFetched = 0;
+  let cacheHits = 0;
 
   for (const { url, sourcePage } of bookLinks) {
     try {
-      const record = await extractBookRecord({
+      const {raw , fromCache } = await extractBookRecord({
         url,
         sourcePage,
         lastRequestTime,
       });
 
-      const validation = normalizeBookRecord(record);
+      pagesFetched += 1;
+      if (fromCache) cacheHits += 1;
+
+      const validation = normalizeBookRecord(raw);
 
       if (!validation.ok) {
         badRecords.push({
@@ -133,5 +141,7 @@ export const extractValidatedRecords = async (bookLinks) => {
   return {
     goodRecords,
     badRecords,
+    pagesFetched,
+    cacheHits,
   }
 }

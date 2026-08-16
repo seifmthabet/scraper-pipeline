@@ -12,11 +12,15 @@ const ensureOutputDirExists = () => {
 const main = async () => {
   ensureOutputDirExists();
 
+  const startedAt = new Date();
+  const startedMs = Date.now();
+
   const result = await crawlCatalogue();
 
-  const { goodRecords, badRecords } = await extractValidatedRecords(
-    result.bookLinks,
-  );
+  const bookLinks = [...result.bookLinks];
+
+  const { goodRecords, badRecords, pagesFetched, cacheHits } =
+    await extractValidatedRecords(bookLinks);
 
   const sortedBooks = [...goodRecords].sort((a, b) =>
     a.product_url.localeCompare(b.product_url),
@@ -33,6 +37,21 @@ const main = async () => {
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "errors.json"),
     JSON.stringify(sortedErrors, null, 2),
+  );
+
+  const runReport = {
+    start_time: startedAt.toISOString(),
+    duration_ms: Date.now() - startedMs,
+    pages_fetched: pagesFetched,
+    cache_hits: cacheHits,
+    valid_records: sortedBooks.length,
+    invalid_records: sortedErrors.length,
+    failed_pages: sortedErrors.length,
+  };
+
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, "run-report.json"),
+    JSON.stringify(runReport, null, 2),
   );
 
   if (sortedBooks.length > 0) {
