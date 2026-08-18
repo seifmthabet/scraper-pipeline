@@ -3,6 +3,7 @@ import * as path from "path";
 
 import { crawlCatalogue } from "./crawler.js";
 import { extractValidatedRecords } from "./extractor.js";
+import { buildCsvBooks } from "./csv.js";
 import { OUTPUT_DIR } from "./config.js";
 
 const ensureOutputDirExists = () => {
@@ -52,6 +53,14 @@ const main = async () => {
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "run-report.json"),
     JSON.stringify(runReport, null, 2),
+  );
+
+  const { csvText, flatteningNotes } = buildCsvBooks(sortedBooks);
+  fs.writeFileSync(path.join(OUTPUT_DIR, "books.csv"), csvText);
+
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, "flattening-notes.json"),
+    JSON.stringify(flatteningNotes, null, 2),
   );
 
   if (sortedBooks.length > 0) {

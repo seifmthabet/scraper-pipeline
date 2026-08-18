@@ -1,0 +1,21 @@
+{
+  "output": "books.csv",
+  "notes": [
+    {
+      "field": "rating_text",
+      "rule": "null is flattened to an empty CSV cell",
+      "count": 0
+    },
+    {
+      "field": "description",
+      "rule": "null is flattened to an empty CSV cell",
+      "count": 0
+    },
+    {
+      "field": "all_fields",
+      "rule": "all validated fields are scalar in schema; no nested flattening required",
+      "count": 0
+    }
+  ],
+  "object_fallback_count": 0
+}
